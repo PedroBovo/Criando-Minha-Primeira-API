@@ -1,0 +1,1 @@
+alter table cliente rename column tefelone to fone;
