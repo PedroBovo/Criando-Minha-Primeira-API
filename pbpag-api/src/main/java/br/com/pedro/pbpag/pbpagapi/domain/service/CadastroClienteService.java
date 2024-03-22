@@ -24,7 +24,7 @@ public class CadastroClienteService {
                 .filter(c ->!c.equals(cliente))
                 .isPresent();
         if(emailEmUso){
-            throw new NegocioExeption("Ja existe um negocio cadastrado com esse E-mail");
+            throw new NegocioExeption("Ja existe um cliente cadastrado com esse E-mail");
         }
         return clienteRepository.save(cliente);
     }

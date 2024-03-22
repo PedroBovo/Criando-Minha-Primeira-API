@@ -67,9 +67,6 @@ public class ClienteControler {
         return ResponseEntity.noContent().build();
     }
 
-    @ExceptionHandler(NegocioExeption.class)
-    public ResponseEntity<String> capturar(NegocioExeption e){
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
+
 
 }

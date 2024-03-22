@@ -1,10 +1,13 @@
 package br.com.pedro.pbpag.pbpagapi.controler;
 
 
-import br.com.pedro.pbpag.pbpagapi.domain.exeption.NegocioExeption;
+import br.com.pedro.pbpag.pbpagapi.controler.assembler.ParcelamentoAssembler;
+import br.com.pedro.pbpag.pbpagapi.controler.model.ParcelamentoModel;
+import br.com.pedro.pbpag.pbpagapi.controler.model.input.ParcelamentoInput;
 import br.com.pedro.pbpag.pbpagapi.domain.model.Parcelamento;
 import br.com.pedro.pbpag.pbpagapi.domain.repository.ParcelamentoRepository;
 import br.com.pedro.pbpag.pbpagapi.domain.service.ParcelamentoService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,23 +22,28 @@ public class ParcelamentoControler {
 
     private ParcelamentoRepository parcelamentoRepository;
     private ParcelamentoService parcelamentoService;
+    private ParcelamentoAssembler parcelamentoAssembler;
     @GetMapping
-    public List<Parcelamento> listar(){
-        return parcelamentoRepository.findAll();
+    public List<ParcelamentoModel> listar(){
+        return parcelamentoAssembler.toCollectionModel( parcelamentoRepository.findAll());
     }
+
+
     @GetMapping("/{parcelamentoId}")
-    public ResponseEntity<Parcelamento> bsucar(@PathVariable Long parcelamentoId){
+    public ResponseEntity<ParcelamentoModel> bsucar(@PathVariable Long parcelamentoId){
         return parcelamentoRepository.findById(parcelamentoId)
-                .map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+                .map(parcelamentoAssembler::toModel)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Parcelamento cadastrar(@RequestBody Parcelamento parcelamento){
-        return parcelamentoService.cadastrar(parcelamento);
+    public ParcelamentoModel cadastrar(@Valid  @RequestBody ParcelamentoInput parcelamentoInput){
+        Parcelamento novoParcelamento = parcelamentoAssembler.toEntity(parcelamentoInput);
+        Parcelamento parcelamentoCadastrado = parcelamentoService.cadastrar(novoParcelamento);
+
+        return parcelamentoAssembler.toModel(parcelamentoCadastrado);
     }
-    @ExceptionHandler(NegocioExeption.class)
-    public ResponseEntity<String> capturar(NegocioExeption e){
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
+
 }
